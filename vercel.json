@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "api/horoscopo.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/horoscopo", "dest": "/api/horoscopo.js" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
