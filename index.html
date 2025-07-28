@@ -60,10 +60,7 @@
       }
 
       try {
-        const response = await fetch(`https://aztro.sameerkumar.website/?sign=${signo}&day=today`, {
-          method: 'POST'
-        });
-
+        const response = await fetch(`/api/horoscopo?signo=${signo}`);
         const data = await response.json();
         resultado.innerHTML = `
           <strong>${signo.toUpperCase()}</strong><br><br>
