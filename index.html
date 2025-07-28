@@ -1,121 +1,83 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Horóscopo Diário</title>
   <style>
     body {
-      margin: 0;
       font-family: sans-serif;
-      background: #fdf6f0;
-      color: #333;
-    }
-    header {
       text-align: center;
-      padding: 1rem;
-      background-color: #f39c12;
-      color: white;
-      font-size: 1.5rem;
+      padding: 2rem;
     }
-    .sign-list {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-      padding: 1rem;
+    select, button {
+      font-size: 1rem;
+      margin-top: 1rem;
+      padding: 0.5rem;
     }
-    .sign {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      padding: 1rem;
-      text-align: center;
-      width: 45%;
-      cursor: pointer;
-    }
-    .sign:hover {
-      background: #ffe9c6;
-    }
-    .qr-container {
-      text-align: center;
+    .resultado {
       margin-top: 2rem;
-    }
-    .horoscope {
+      font-size: 1.2rem;
+      background: #f5f5f5;
       padding: 1rem;
-    }
-    .hidden {
+      border-radius: 8px;
       display: none;
-    }
-    @media (max-width: 600px) {
-      .sign {
-        width: 100%;
-      }
     }
   </style>
 </head>
 <body>
-  <header>Horóscopo Diário</header>
-  <div class="sign-list" id="signList"></div>
+  <h1>🔮 Horóscopo do Dia</h1>
+  
+  <select id="signo">
+    <option value="">Escolha seu signo</option>
+    <option value="aries">Áries</option>
+    <option value="taurus">Touro</option>
+    <option value="gemini">Gêmeos</option>
+    <option value="cancer">Câncer</option>
+    <option value="leo">Leão</option>
+    <option value="virgo">Virgem</option>
+    <option value="libra">Libra</option>
+    <option value="scorpio">Escorpião</option>
+    <option value="sagittarius">Sagitário</option>
+    <option value="capricorn">Capricórnio</option>
+    <option value="aquarius">Aquário</option>
+    <option value="pisces">Peixes</option>
+  </select>
 
-  <div class="horoscope hidden" id="horoscopePage">
-    <button onclick="goBack()">⬅ Voltar</button>
-    <h2 id="signTitle"></h2>
-    <p id="horoscopeText">Carregando horóscopo...</p>
-    <div class="qr-container">
-      <canvas id="qrCanvas"></canvas>
-    </div>
-  </div>
+  <br>
+  <button onclick="buscarHoroscopo()">Ver horóscopo</button>
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <div class="resultado" id="resultado"></div>
+
   <script>
-    const signs = [
-      'Áries', 'Touro', 'Gêmeos', 'Câncer', 'Leão', 'Virgem',
-      'Libra', 'Escorpião', 'Sagitário', 'Capricórnio', 'Aquário', 'Peixes'
-    ];
+    async function buscarHoroscopo() {
+      const signo = document.getElementById('signo').value;
+      const resultado = document.getElementById('resultado');
 
-    const signList = document.getElementById('signList');
-    const horoscopePage = document.getElementById('horoscopePage');
-    const signTitle = document.getElementById('signTitle');
-    const horoscopeText = document.getElementById('horoscopeText');
-    const qrCanvas = document.getElementById('qrCanvas');
-
-    // Gera os botões para os signos
-    signs.forEach(sign => {
-      const div = document.createElement('div');
-      div.className = 'sign';
-      div.innerText = sign;
-      div.onclick = () => showHoroscope(sign);
-      signList.appendChild(div);
-    });
-
-    function goBack() {
-      horoscopePage.classList.add('hidden');
-      signList.classList.remove('hidden');
-    }
-
-    async function showHoroscope(sign) {
-      signList.classList.add('hidden');
-      horoscopePage.classList.remove('hidden');
-      signTitle.innerText = sign;
-      horoscopeText.innerText = 'Carregando horóscopo...';
+      if (!signo) {
+        resultado.textContent = "Por favor, selecione um signo.";
+        resultado.style.display = "block";
+        return;
+      }
 
       try {
-        const response = await fetch("/api/horoscopo", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sign })
+        const response = await fetch(`https://aztro.sameerkumar.website/?sign=${signo}&day=today`, {
+          method: 'POST'
         });
 
         const data = await response.json();
-        horoscopeText.innerText = data.content || "Horóscopo não encontrado.";
-
-        const currentUrl = `${location.origin}${location.pathname}#${sign}`;
-        QRCode.toCanvas(qrCanvas, currentUrl, { width: 200 });
-
-      } catch (error) {
-        horoscopeText.innerText = "Erro ao carregar horóscopo.";
-        console.error(error);
+        resultado.innerHTML = `
+          <strong>${signo.toUpperCase()}</strong><br><br>
+          <em>${data.date_range}</em><br><br>
+          <p>${data.description}</p>
+          <p>Compatibilidade: ${data.compatibility}</p>
+          <p>Humor: ${data.mood}</p>
+          <p>Cor do dia: ${data.color}</p>
+          <p>Número da sorte: ${data.lucky_number}</p>
+        `;
+        resultado.style.display = 'block';
+      } catch (err) {
+        resultado.textContent = "Erro ao buscar horóscopo.";
+        resultado.style.display = "block";
       }
     }
   </script>
